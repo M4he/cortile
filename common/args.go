@@ -35,6 +35,7 @@ type Arguments struct {
 	VVV    bool   // Argument for very very verbose mode
 	VV     bool   // Argument for very verbose mode
 	V      bool   // Argument for verbose mode
+	NoMouse bool  // Argument for disabling mouse listener
 }
 
 func InitArgs(name, version, commit, date, source string) {
@@ -59,6 +60,7 @@ func InitArgs(name, version, commit, date, source string) {
 	flag.BoolVar(&Args.VVV, "vvv", false, "very very verbose mode")
 	flag.BoolVar(&Args.VV, "vv", false, "very verbose mode")
 	flag.BoolVar(&Args.V, "v", false, "verbose mode")
+	flag.BoolVar(&Args.NoMouse, "no-mouse", false, "no mouse polling mode")
 
 	// Command line usage text
 	flag.CommandLine.Usage = func() {

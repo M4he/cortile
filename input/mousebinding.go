@@ -13,10 +13,12 @@ import (
 
 var (
 	workspace *desktop.Workspace // Stores last active workspace
+	do_poll_x bool // poll X server for events?
 )
 
-func BindMouse(tr *desktop.Tracker) {
+func BindMouse(tr *desktop.Tracker, polling_enabled bool) {
 	poll(100, func() {
+		do_poll_x = polling_enabled
 		pt := store.PointerUpdate(store.X)
 
 		// Update systray icon
@@ -47,9 +49,11 @@ func poll(t time.Duration, fun func()) {
 	fun()
 	go func() {
 		for range time.Tick(t * time.Millisecond) {
-			_, err := store.X.Conn().PollForEvent()
-			if err != nil {
-				continue
+			if do_poll_x {
+				_, err := store.X.Conn().PollForEvent()
+				if err != nil {
+					continue
+				}
 			}
 			fun()
 		}
