@@ -26,6 +26,16 @@ type Workspace struct {
 func CreateWorkspaces() map[store.Location]*Workspace {
 	workspaces := make(map[store.Location]*Workspace)
 
+	// assume screen no. 0 is primary unless xrandr has reported
+	// something different
+	var primaryScreenNum uint = 0
+	for i, s := range store.Displays.Screens {
+		if s.Primary {
+			primaryScreenNum = uint(i)
+			break
+		}
+	}
+
 	for deskNum := uint(0); deskNum < store.DeskCount; deskNum++ {
 		for screenNum := uint(0); screenNum < store.ScreenCount; screenNum++ {
 			location := store.Location{DeskNum: deskNum, ScreenNum: screenNum}
@@ -39,9 +49,38 @@ func CreateWorkspaces() map[store.Location]*Workspace {
 				ActiveLayoutNum: 0,
 			}
 
+			// default to old config entry (TODO: remove?)
+			var layoutName string = common.Config.TilingLayout
+			// Use TilingLayouts config list to map layout rules to screens
+			// and workspaces; first matching rule wins
+			for _, s := range common.Config.TilingLayouts {
+				conf_screen := s[0]
+				conf_desk := s[1]
+				conf_layout := s[2]
+
+				// first, try to match screen
+				var screenMatch bool = false
+				if conf_screen == "p" && screenNum == primaryScreenNum {
+					screenMatch = true
+				} else if conf_screen == fmt.Sprintf("%d", screenNum+1) {
+					screenMatch = true
+				} else if conf_screen == "*" {
+					screenMatch = true
+				}
+				if !screenMatch {
+					continue
+				}
+
+				// next, try to match workspace
+				if fmt.Sprintf("%d", deskNum+1) == conf_desk || conf_desk == "*" {
+					layoutName = conf_layout
+					break
+				}
+			}
+
 			// Set default layout
 			for i, l := range ws.Layouts {
-				if l.GetName() == common.Config.TilingLayout {
+				if l.GetName() == layoutName {
 					ws.SetLayout(uint(i))
 				}
 			}

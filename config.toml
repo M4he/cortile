@@ -12,6 +12,19 @@ tiling_enabled = true
 # Initial tiling layout ("fullscreen" | "vertical-left" | "vertical-right" | "horizontal-top" | "horizontal-bottom").
 tiling_layout = "vertical-right"
 
+# Initial tiling layout rule mappings
+# tiling_layouts = [
+#     ["SCREEN", "DESK", "LAYOUT"]
+# ]
+# SCREEN = "p" (primary), quoted number or "*" (matches all)
+# DESK = quoted number or "*" (match all)
+# LAYOUT = string, name of the layout
+# (numbers start at 1)
+tiling_layouts = [
+    # ["p", "2", "fullscreen"],
+    ["*", "*", "vertical-right"]
+]
+
 # An overlay window is displayed for this time period [ms] when the layout was changed (0 = disabled).
 tiling_gui = 1500
 
