@@ -28,6 +28,7 @@ type Client struct {
 	Win      *xwindow.Window `json:"-"` // X window object
 	Created  time.Time       // Internal client creation time
 	Locked   bool            // Internal client move/resize lock
+	Floating bool            // Internal temporary floating flag
 	Original *Info           // Original client window information
 	Cached   *Info           // Cached client window information
 	Latest   *Info           // Latest client window information
@@ -80,6 +81,7 @@ func CreateClient(w xproto.Window) *Client {
 		Win:      xwindow.New(X, w),
 		Created:  time.Now(),
 		Locked:   false,
+		Floating: false,
 		Original: GetInfo(w),
 		Cached:   GetInfo(w),
 		Latest:   GetInfo(w),
@@ -174,6 +176,17 @@ func (c *Client) MoveResize(x, y, w, h int) {
 
 	// Update stored dimensions
 	c.Update()
+}
+
+func (c *Client) SetAbove(unlockSizeLimits bool) {
+	ewmh.WmStateReq(X, c.Win.Id, 1, "_NET_WM_STATE_ABOVE")
+	if unlockSizeLimits {
+		icccm.WmNormalHintsSet(X, c.Win.Id, &c.Cached.Dimensions.Hints.Normal)
+	}
+}
+
+func (c *Client) UnsetAbove() {
+	ewmh.WmStateReq(X, c.Win.Id, 0, "_NET_WM_STATE_ABOVE")
 }
 
 func (c *Client) LimitDimensions(w, h int) {

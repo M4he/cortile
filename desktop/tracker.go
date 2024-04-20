@@ -73,7 +73,21 @@ func (tr *Tracker) Update() {
 	// Remove untrackable windows
 	for w := range tr.Clients {
 		if !trackable[w] {
-			tr.untrackWindow(w)
+			// Keep tracking windows that still exist and are temporarily floated by Cortile
+			// TODO: this approach is terrible; optimize this!
+			keep := false
+			if tr.Clients[w].Floating {
+				// only keep the window if it still exists on X side
+				for _, win := range store.Windows {
+					if w == win {
+						keep = true
+						break
+					}
+				}
+			}
+			if !keep {
+				tr.untrackWindow(w)
+			}
 		}
 	}
 
@@ -368,7 +382,7 @@ func (tr *Tracker) handleSwapClient(c *store.Client) {
 }
 
 func (tr *Tracker) handleWorkspaceChange(c *store.Client) {
-	if !tr.isTracked(c.Win.Id) {
+	if !tr.isTracked(c.Win.Id) || c.Floating {
 		return
 	}
 	log.Debug("Client workspace handler fired [", c.Latest.Class, "]")

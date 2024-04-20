@@ -86,6 +86,8 @@ func Execute(action string, mod string, tr *desktop.Tracker) bool {
 			success = NextWindow(tr, ws)
 		case "window_previous":
 			success = PreviousWindow(tr, ws)
+		case "toggle_floating":
+			success = ToggleFloating(tr, ws)
 		case "reset":
 			success = Reset(tr, ws)
 		case "exit":
@@ -312,6 +314,23 @@ func HorizontalBottomLayout(tr *desktop.Tracker, ws *desktop.Workspace) bool {
 	return true
 }
 
+func ToggleFloating(tr *desktop.Tracker, ws *desktop.Workspace) bool {
+	if c, ok := tr.Clients[store.ActiveWindow]; ok {
+		c.Floating = !c.Floating
+		if c.Floating {
+			ws.RemoveClient(c)
+			c.SetAbove(true)
+		} else {
+			c.UnsetAbove()
+			ws.AddClient(c)
+		}
+		ws.Tile()
+		return true
+	}
+
+	return false
+}
+
 func MakeMaster(tr *desktop.Tracker, ws *desktop.Workspace) bool {
 	if ws.Disabled() {
 		return false
@@ -471,6 +490,11 @@ func Reset(tr *desktop.Tracker, ws *desktop.Workspace) bool {
 func Exit(tr *desktop.Tracker) bool {
 	tr.Write()
 
+	for _, c := range tr.Clients {
+		if c.Floating {
+			c.UnsetAbove()
+		}
+	}
 	for _, ws := range tr.Workspaces {
 		if ws.Disabled() {
 			continue

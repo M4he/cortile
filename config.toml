@@ -192,6 +192,9 @@ window_next = "Control-Shift-KP_2"
 # Moves focus to the previous window (KP_8 = Num_8).
 window_previous = "Control-Shift-KP_8"
 
+# Toggles the temporary floating state of the window.
+toggle_floating = "Control-Shift-E"
+
 # The commands above will affect all screens if this key is pressed in addition (Mod1 = Alt_L).
 mod_screens = "Mod1"
 
